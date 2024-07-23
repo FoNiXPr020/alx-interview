@@ -13,26 +13,24 @@ def validUTF8(data):
         bool: True if data is a valid UTF-8 encoding, else False.
     """
     skip = 0
-    for i, byte in enumerate(data):
+    for byte in data:
         if skip > 0:
             skip -= 1
             continue
-        if not (isinstance(byte, int) and 0 <= byte <= 0x10ffff):
-            return False
-        if byte <= 0x7f:
-            skip = 0
-        elif byte >= 0b11110000:
-            if (byte & 0b11100000) == 0b11100000:
-                span = 3
-            elif (byte & 0b11111000) == 0b11110000:
-                span = 4
+        if byte >> 5 == 0b111:
+            if byte >> 4 == 0b1110:
+                skip = 1
+            elif byte >> 3 == 0b11110:
+                skip = 2
+            elif byte >> 2 == 0b111110:
+                skip = 3
             else:
                 return False
-            if i + span > len(data):
+            if len(data) - len(data[data.index(byte):]) < skip:
                 return False
-            if not all(data[i + 1] >> 6 == 0b10 for i in range(1, span)):
-                return False
-            skip = span - 1
-        else:
+            for i in range(1, skip):
+                if data[i + data.index(byte)] >> 6 != 0b10:
+                    return False
+        elif byte >> 7 != 0:
             return False
     return True
