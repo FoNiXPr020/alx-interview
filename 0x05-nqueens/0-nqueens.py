@@ -2,6 +2,7 @@
 """Solves the N queens problem"""
 import sys
 
+
 def solve_queens_problem(board_size):
     """Find all solutions to the N queens problem"""
 
